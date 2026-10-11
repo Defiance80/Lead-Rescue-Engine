@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BellRing, Mail, ShieldCheck, Zap } from "lucide-react";
-import { AuthError } from "next-auth";
-import { auth, enabledProviders, signIn } from "@/auth";
+import Link from "next/link";
+import { auth, enabledProviders } from "@/auth";
+import { devSignInAction, emailLinkAction, googleSignInAction, passwordSignInAction } from "../auth-actions";
 import { Logo } from "@/components/logo";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -23,7 +24,6 @@ export default async function LoginPage({
   if (session?.user) redirect("/today");
   const { check, error } = await searchParams;
   const p = enabledProviders;
-  const nothingConfigured = !p.google && !p.email && !p.password && !p.dev;
 
   return (
     <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
@@ -91,89 +91,51 @@ export default async function LoginPage({
 
           <div className="mt-8 space-y-4">
             {p.google && (
-              <form
-                action={async () => {
-                  "use server";
-                  await safeSignIn("google", { redirectTo: "/today" });
-                }}
-              >
-                <button className="btn w-full border border-white/10 bg-white py-3 text-[15px] text-slate-900 hover:bg-slate-100">
-                  <GoogleIcon /> Continue with Google
-                </button>
-              </form>
-            )}
-
-            {p.google && p.email && (
-              <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-slate-500">
-                <span className="h-px flex-1 bg-white/10" /> or <span className="h-px flex-1 bg-white/10" />
-              </div>
-            )}
-
-            {p.email && (
-              <form
-                action={async (formData: FormData) => {
-                  "use server";
-                  await safeSignIn("resend", { email: formData.get("email"), redirectTo: "/today" });
-                }}
-                className="space-y-3"
-              >
-                <label className="label" htmlFor="email">Work email</label>
-                <input id="email" name="email" type="email" required autoComplete="email" placeholder="you@yourbrokerage.com" className="input py-3" />
-                <button className="btn-primary w-full py-3 text-[15px]">
-                  <Mail className="h-4 w-4" /> Email me a sign-in link
-                </button>
-              </form>
-            )}
-
-            {p.password && (p.google || p.email) && (
-              <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-slate-500">
-                <span className="h-px flex-1 bg-white/10" /> or <span className="h-px flex-1 bg-white/10" />
-              </div>
-            )}
-
-            {p.password && (
-              <form
-                action={async (formData: FormData) => {
-                  "use server";
-                  await safeSignIn("password", {
-                    email: formData.get("email"),
-                    password: formData.get("password"),
-                    redirectTo: "/today",
-                  });
-                }}
-                className="space-y-3"
-              >
-                <div>
-                  <label className="label" htmlFor="pw-email">Email</label>
-                  <input id="pw-email" name="email" type="email" required autoComplete="email" placeholder="you@yourbrokerage.com" className="input py-3" />
+              <>
+                <form action={googleSignInAction}>
+                  <button className="btn w-full border border-white/10 bg-white py-3 text-[15px] text-slate-900 hover:bg-slate-100">
+                    <GoogleIcon /> Continue with Google
+                  </button>
+                </form>
+                <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-slate-500">
+                  <span className="h-px flex-1 bg-white/10" /> or <span className="h-px flex-1 bg-white/10" />
                 </div>
-                <div>
-                  <label className="label" htmlFor="pw-password">Password</label>
-                  <input id="pw-password" name="password" type="password" required autoComplete="current-password" className="input py-3" />
-                </div>
-                <button className="btn-primary w-full py-3 text-[15px]">Sign in</button>
-              </form>
+              </>
+            )}
+
+            <form action={passwordSignInAction} className="space-y-3">
+              <div>
+                <label className="label" htmlFor="pw-email">Email</label>
+                <input id="pw-email" name="email" type="email" required autoComplete="email" placeholder="you@yourbrokerage.com" className="input py-3" />
+              </div>
+              <div>
+                <label className="label" htmlFor="pw-password">Password</label>
+                <input id="pw-password" name="password" type="password" required autoComplete="current-password" className="input py-3" />
+              </div>
+              <button className="btn-primary w-full py-3 text-[15px]">Sign in</button>
+            </form>
+
+            <p className="text-center text-sm text-slate-400">
+              New here?{" "}
+              <Link href="/signup" className="font-semibold text-ember-300 hover:text-ember-200">Create an account</Link>
+            </p>
+
+            {p.emailLink && (
+              <details className="rounded-xl border border-white/[0.06] p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-slate-300">Forgot your password? Email me a sign-in link</summary>
+                <form action={emailLinkAction} className="mt-3 flex gap-2">
+                  <input name="email" type="email" required placeholder="you@yourbrokerage.com" className="input" aria-label="Email for sign-in link" />
+                  <button className="btn-secondary shrink-0"><Mail className="h-4 w-4" /> Send</button>
+                </form>
+              </details>
             )}
 
             {p.dev && (
-              <form
-                action={async (formData: FormData) => {
-                  "use server";
-                  await safeSignIn("dev", { email: formData.get("email"), redirectTo: "/today" });
-                }}
-                className="space-y-3 rounded-xl border border-dashed border-amber-400/30 p-4"
-              >
+              <form action={devSignInAction} className="space-y-3 rounded-xl border border-dashed border-amber-400/30 p-4">
                 <div className="eyebrow text-amber-300">Local dev login</div>
                 <input name="email" type="email" required defaultValue="ian@example.com" className="input" />
                 <button className="btn-secondary w-full">Sign in (dev only)</button>
               </form>
-            )}
-
-            {nothingConfigured && (
-              <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-100">
-                No sign-in method is configured yet. Add Google or Resend keys to your environment
-                variables (see README).
-              </div>
             )}
           </div>
 
@@ -195,17 +157,4 @@ function GoogleIcon() {
       <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
     </svg>
   );
-}
-
-// A failed sign-in (wrong password, email not allowed…) throws an AuthError.
-// Turn it into a friendly message on this page instead of a crash screen.
-// Anything else (including Next.js's own redirect after success) passes through.
-async function safeSignIn(...args: Parameters<typeof signIn>) {
-  "use server";
-  try {
-    await signIn(...args);
-  } catch (err) {
-    if (err instanceof AuthError) redirect(`/login?error=${err.type}`);
-    throw err;
-  }
 }

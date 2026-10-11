@@ -18,6 +18,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  passwordHash  String? // only for email + password accounts (scrypt, never the real password)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

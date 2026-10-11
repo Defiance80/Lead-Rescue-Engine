@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { CheckCircle2, Database, Download, KeyRound, Moon, PlugZap, RefreshCw, UserRound } from "lucide-react";
+import { CheckCircle2, Database, Download, KeyRound, Lock, Moon, PlugZap, RefreshCw, UserRound } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/ui";
 import { ActionButton, CopyButton } from "@/components/client";
 import { clearSampleAction, loadSampleAction, regenerateTokenAction, updateSettingsAction } from "../../actions";
+import { changePasswordAction } from "../../auth-actions";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -21,7 +22,14 @@ const ZONES = [
 
 const HOURS = Array.from({ length: 24 }, (_, h) => [h, new Date(2000, 0, 1, h).toLocaleTimeString("en-US", { hour: "numeric" })] as const);
 
-export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+const PW_MSG: Record<string, { text: string; ok?: boolean }> = {
+  saved: { text: "Password updated.", ok: true },
+  wrong: { text: "Your current password wasn't right." },
+  short: { text: "New passwords need at least 8 characters." },
+  mismatch: { text: "The new passwords didn't match." },
+};
+
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string; pw?: string }> }) {
   const user = await requireUser();
   const sp = await searchParams;
   const h = await headers();
@@ -135,6 +143,39 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             <code> lead_source</code>, Facebook&apos;s <code>field_data</code> and more are all understood.
           </p>
         </details>
+      </section>
+
+      <section id="password" className="card card-pad scroll-mt-24">
+        <SectionHead
+          icon={Lock}
+          tone="bg-rose-400/10 text-rose-300"
+          title={user.passwordHash ? "Change password" : "Set a password"}
+          text={user.passwordHash ? "For signing in with your email." : "Add a password so you can also sign in with your email, not just Google."}
+        />
+        {sp.pw && PW_MSG[sp.pw] && (
+          <div className={`mt-4 rounded-xl border p-3 text-sm ${PW_MSG[sp.pw].ok ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-100" : "border-rose-400/30 bg-rose-500/10 text-rose-100"}`}>
+            {PW_MSG[sp.pw].text}
+          </div>
+        )}
+        <form action={changePasswordAction} className="mt-4 grid gap-3 sm:grid-cols-3">
+          {user.passwordHash && (
+            <div>
+              <label className="label" htmlFor="current">Current password</label>
+              <input id="current" name="current" type="password" required autoComplete="current-password" className="input" />
+            </div>
+          )}
+          <div>
+            <label className="label" htmlFor="new-password">New password</label>
+            <input id="new-password" name="password" type="password" required minLength={8} autoComplete="new-password" className="input" />
+          </div>
+          <div>
+            <label className="label" htmlFor="confirm-password">Confirm</label>
+            <input id="confirm-password" name="confirm" type="password" required minLength={8} autoComplete="new-password" className="input" />
+          </div>
+          <div className="sm:col-span-3 flex justify-end">
+            <button className="btn-secondary">{user.passwordHash ? "Update password" : "Set password"}</button>
+          </div>
+        </form>
       </section>
 
       <section className="card card-pad">

@@ -1,19 +1,21 @@
 // Sign-in setup (Auth.js v5).
 //
-// • Google  — enabled when AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET are set
-// • Email   — "magic link" sent through Resend when AUTH_RESEND_KEY is set
-// • Password — email + one shared password (APP_PASSWORD, 12+ characters).
-//             The quickest way in; pair it with ALLOWED_EMAILS.
-// • Dev     — a no-password login for local testing ONLY (DEV_LOGIN=true and
-//             never in production)
+// • Google   — "Continue with Google", enabled when AUTH_GOOGLE_ID /
+//              AUTH_GOOGLE_SECRET are set
+// • Password — regular email + password accounts (always on). People create
+//              an account at /signup. ALLOWED_EMAILS limits who may join.
+// • Email link — optional "email me a sign-in link" through Resend when
+//              AUTH_RESEND_KEY is set; doubles as "forgot password"
+// • Dev      — a no-password login for local testing ONLY (DEV_LOGIN=true and
+//              never in production)
 
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { createHash, timingSafeEqual } from "node:crypto";
 import { db } from "@/lib/db";
+import { verifyPassword } from "@/lib/password";
 
 const providers: NextAuthConfig["providers"] = [];
 
@@ -30,33 +32,21 @@ if (process.env.AUTH_RESEND_KEY) {
   );
 }
 
-// Too-short passwords are ignored so a weak setting can't leave the app open.
-const appPassword = process.env.APP_PASSWORD ?? "";
-export const passwordLoginEnabled = appPassword.length >= 12;
-
-// Compare fingerprints of the two passwords in constant time, so an attacker
-// can't learn the password from how long the check takes.
-function passwordMatches(input: string) {
-  const a = createHash("sha256").update(input).digest();
-  const b = createHash("sha256").update(appPassword).digest();
-  return timingSafeEqual(a, b);
-}
-
-if (passwordLoginEnabled) {
-  providers.push(
-    Credentials({
-      id: "password",
-      name: "Password",
-      credentials: { email: { label: "Email" }, password: { label: "Password", type: "password" } },
-      async authorize(creds) {
-        const email = String(creds?.email ?? "").toLowerCase().trim();
-        const password = String(creds?.password ?? "");
-        if (!email || !password || !passwordMatches(password) || !isAllowed(email)) return null;
-        return db.user.upsert({ where: { email }, update: {}, create: { email, name: email.split("@")[0] } });
-      },
-    }),
-  );
-}
+providers.push(
+  Credentials({
+    id: "password",
+    name: "Email and password",
+    credentials: { email: { label: "Email" }, password: { label: "Password", type: "password" } },
+    async authorize(creds) {
+      const email = String(creds?.email ?? "").toLowerCase().trim();
+      const password = String(creds?.password ?? "");
+      if (!email || !password || !isAllowed(email)) return null;
+      const user = await db.user.findUnique({ where: { email } });
+      if (!user || !(await verifyPassword(password, user.passwordHash))) return null;
+      return user;
+    },
+  }),
+);
 
 export const devLoginEnabled = process.env.DEV_LOGIN === "true" && process.env.NODE_ENV !== "production";
 
@@ -77,12 +67,11 @@ if (devLoginEnabled) {
 
 export const enabledProviders = {
   google: !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET),
-  email: !!process.env.AUTH_RESEND_KEY,
-  password: passwordLoginEnabled,
+  emailLink: !!process.env.AUTH_RESEND_KEY,
   dev: devLoginEnabled,
 };
 
-function isAllowed(email?: string | null) {
+export function isAllowed(email?: string | null) {
   const list = (process.env.ALLOWED_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
@@ -99,12 +88,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
   pages: { signIn: "/login", verifyRequest: "/login?check=email", error: "/login" },
   callbacks: {
-    signIn({ user }) {
-      return isAllowed(user.email);
+    async signIn({ user, account }) {
+      if (!isAllowed(user.email)) return false;
+      // Google (or an email link) proves the person owns that inbox. If a
+      // password account was created for the same email without that proof,
+      // remove its password so whoever made it can't keep a back door.
+      if (account && account.provider !== "password" && account.provider !== "dev" && user.email) {
+        await db.user.updateMany({
+          where: { email: user.email.toLowerCase(), emailVerified: null, NOT: { passwordHash: null } },
+          data: { passwordHash: null },
+        });
+      }
+      return true;
     },
     session({ session, token }) {
       if (token.sub) session.user.id = token.sub;
       return session;
+    },
+  },
+  events: {
+    // Mark the email as verified once Google or an email link confirms it.
+    async signIn({ user, account }) {
+      if (account && (account.provider === "google" || account.provider === "resend") && user.email) {
+        await db.user.updateMany({ where: { email: user.email.toLowerCase(), emailVerified: null }, data: { emailVerified: new Date() } });
+      }
     },
   },
   trustHost: true,
