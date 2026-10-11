@@ -39,8 +39,9 @@ and **Tailwind CSS**. Hosts on **Vercel**. Pairs with **n8n** for sending texts/
 
 ### 2. Add a database
 1. In your Vercel project: **Storage → Create Database → Neon (Postgres)** → connect it to the project.
-2. This automatically adds `DATABASE_URL` and `DATABASE_URL_UNPOOLED`. (If your names differ, copy
-   the values into variables with those exact names.)
+2. This adds `DATABASE_URL` (and usually `DATABASE_URL_UNPOOLED`) for you. Only `DATABASE_URL`
+   is required — if your database's variable has a different name, copy its value into
+   a variable called `DATABASE_URL`.
 
 The tables are created automatically on every deploy (`vercel-build` runs `prisma db push`).
 
