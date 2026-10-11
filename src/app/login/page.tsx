@@ -74,6 +74,12 @@ export default async function LoginPage({
           <h2 className="font-display text-3xl font-bold tracking-tight text-white">Welcome back</h2>
           <p className="mt-2 text-slate-400">Sign in to see who&apos;s waiting on you today.</p>
 
+          {!process.env.AUTH_SECRET && (
+            <div className="mt-6 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-100">
+              <b>Setup needed:</b> sign-in won&apos;t work until <code>AUTH_SECRET</code> is added in Vercel
+              (Settings → Environment Variables), followed by a redeploy.
+            </div>
+          )}
           {check === "email" && (
             <div className="mt-6 flex gap-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4 text-sm text-cyan-100">
               <Mail className="h-5 w-5 shrink-0 text-cyan-300" />

@@ -31,6 +31,12 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
         <h1 className="font-display text-3xl font-bold tracking-tight text-white">Create your account</h1>
         <p className="mt-2 text-slate-400">Takes a minute. Then every lead has a safety net.</p>
 
+        {!process.env.AUTH_SECRET && (
+          <div className="mt-6 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-100">
+            <b>Setup needed:</b> sign-in won&apos;t work until <code>AUTH_SECRET</code> is added in Vercel
+            (Settings → Environment Variables), followed by a redeploy.
+          </div>
+        )}
         {error && (
           <div className="mt-6 rounded-xl border border-rose-400/30 bg-rose-500/10 p-4 text-sm text-rose-100">
             {ERRORS[error] ?? "Something went wrong. Please try again."}
