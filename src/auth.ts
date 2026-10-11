@@ -13,11 +13,20 @@ import NextAuth, { type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
 import Credentials from "next-auth/providers/credentials";
+import { CredentialsSignin } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
 
 const providers: NextAuthConfig["providers"] = [];
+
+// Carries a short reason code back to the sign-in page (?code=...).
+class SignInProblem extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
+}
 
 if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
   providers.push(Google({ allowDangerousEmailAccountLinking: true }));
@@ -40,9 +49,13 @@ providers.push(
     async authorize(creds) {
       const email = String(creds?.email ?? "").toLowerCase().trim();
       const password = String(creds?.password ?? "");
-      if (!email || !password || !isAllowed(email)) return null;
+      if (!email || !password) return null;
+      // Specific reasons help a small team fix sign-in problems themselves.
+      if (!isAllowed(email)) throw new SignInProblem("not_allowed");
       const user = await db.user.findUnique({ where: { email } });
-      if (!user || !(await verifyPassword(password, user.passwordHash))) return null;
+      if (!user) throw new SignInProblem("no_account");
+      if (!user.passwordHash) throw new SignInProblem("no_password");
+      if (!(await verifyPassword(password, user.passwordHash))) throw new SignInProblem("wrong_password");
       return user;
     },
   }),

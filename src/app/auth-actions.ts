@@ -3,7 +3,7 @@
 // Server Actions for signing in, creating an account, and changing a password.
 
 import { redirect } from "next/navigation";
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
 import { isAllowed, signIn } from "@/auth";
 import { db } from "@/lib/db";
 import { hashPassword, MIN_PASSWORD, verifyPassword } from "@/lib/password";
@@ -17,7 +17,10 @@ async function safeSignIn(back: string, ...args: Parameters<typeof signIn>) {
   try {
     await signIn(...args);
   } catch (err) {
-    if (err instanceof AuthError) redirect(`${back}?error=${err.type}`);
+    if (err instanceof AuthError) {
+      const code = err instanceof CredentialsSignin && err.code !== "credentials" ? `&code=${err.code}` : "";
+      redirect(`${back}?error=${err.type}${code}`);
+    }
     throw err;
   }
 }
@@ -54,8 +57,22 @@ export async function signUpAction(formData: FormData) {
   if (password !== confirm) fail("mismatch");
   if (!isAllowed(email)) fail("notallowed");
 
-  const existing = await db.user.findUnique({ where: { email: email! } });
+  const existing = await db.user.findUnique({
+    where: { email: email! },
+    include: { _count: { select: { accounts: true, leads: true } } },
+  });
   if (existing?.passwordHash) fail("exists");
+
+  // A leftover record with no password, no Google link and no leads (e.g. from
+  // an earlier failed sign-in) holds nothing — let this sign-up claim it.
+  if (existing && existing._count.accounts === 0 && existing._count.leads === 0 && !existing.emailVerified) {
+    await db.user.update({
+      where: { id: existing.id },
+      data: { passwordHash: await hashPassword(password), name: existing.name ?? (name || null), displayName: existing.displayName ?? (name.split(" ")[0] || null) },
+    });
+    await safeSignIn("/signup", "password", { email, password, redirectTo: "/today" });
+    return;
+  }
   // An account made through Google is already verified; don't let someone
   // attach a password to it without being signed in.
   if (existing) fail("google");

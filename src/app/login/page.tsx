@@ -8,6 +8,13 @@ import { Logo } from "@/components/logo";
 
 export const metadata: Metadata = { title: "Sign in" };
 
+const SIGNIN_CODES: Record<string, React.ReactNode> = {
+  no_account: <>There&apos;s no account with that email yet on this site. <a href="/signup" className="font-semibold underline">Create one here</a>.</>,
+  no_password: <>That account doesn&apos;t have a password yet. <a href="/signup" className="font-semibold underline">Set one up here</a> using the same email.</>,
+  wrong_password: "That password isn't right. Passwords are case-sensitive — check capital letters.",
+  not_allowed: "That email isn't on the allowed list (ALLOWED_EMAILS in Vercel settings).",
+};
+
 const ERRORS: Record<string, string> = {
   CredentialsSignin: "That email and password combination didn't work. Check both and try again.",
   AccessDenied: "That account isn't on the guest list for this workspace.",
@@ -18,11 +25,11 @@ const ERRORS: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ check?: string; error?: string }>;
+  searchParams: Promise<{ check?: string; error?: string; code?: string }>;
 }) {
   const session = await auth();
   if (session?.user) redirect("/today");
-  const { check, error } = await searchParams;
+  const { check, error, code } = await searchParams;
   const p = enabledProviders;
 
   return (
@@ -91,7 +98,7 @@ export default async function LoginPage({
           )}
           {error && (
             <div className="mt-6 rounded-xl border border-rose-400/30 bg-rose-500/10 p-4 text-sm text-rose-100">
-              {ERRORS[error] ?? "Something went wrong signing in. Please try again."}
+              {(code && SIGNIN_CODES[code]) ?? ERRORS[error] ?? "Something went wrong signing in. Please try again."}
             </div>
           )}
 
