@@ -49,13 +49,21 @@ The tables are created automatically on every deploy (`vercel-build` runs `prism
 Add an environment variable `AUTH_SECRET`. Generate a value with `openssl rand -base64 32`
 (or any long random string).
 
-### 4. Google sign-in
+### 4. Quickest sign-in: a password (2 minutes)
+Add two environment variables:
+- `APP_PASSWORD` — a password of **at least 12 characters** (shorter ones are ignored on purpose).
+- `ALLOWED_EMAILS` — the email(s) allowed to sign in, comma separated.
+
+Redeploy, then sign in with one of those emails and the password. You can keep this
+alongside Google/email sign-in, or remove `APP_PASSWORD` once those are working.
+
+### 4b. Google sign-in
 1. [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials)
    → **Create credentials → OAuth client ID** → *Web application*.
 2. **Authorized redirect URI:** `https://YOUR-APP.vercel.app/api/auth/callback/google`
 3. Add `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` in Vercel.
 
-### 5. Email (magic link) sign-in
+### 5. Email (magic link) sign-in (optional)
 1. Create a free [Resend](https://resend.com) account, verify your domain, and create an API key.
 2. Add `AUTH_RESEND_KEY` and `EMAIL_FROM` (e.g. `Lead Rescue <login@yourdomain.com>`).
 

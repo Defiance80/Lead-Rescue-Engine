@@ -2,6 +2,8 @@
 //
 // • Google  — enabled when AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET are set
 // • Email   — "magic link" sent through Resend when AUTH_RESEND_KEY is set
+// • Password — email + one shared password (APP_PASSWORD, 12+ characters).
+//             The quickest way in; pair it with ALLOWED_EMAILS.
 // • Dev     — a no-password login for local testing ONLY (DEV_LOGIN=true and
 //             never in production)
 
@@ -10,6 +12,7 @@ import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { db } from "@/lib/db";
 
 const providers: NextAuthConfig["providers"] = [];
@@ -23,6 +26,34 @@ if (process.env.AUTH_RESEND_KEY) {
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY,
       from: process.env.EMAIL_FROM ?? "Lead Rescue <onboarding@resend.dev>",
+    }),
+  );
+}
+
+// Too-short passwords are ignored so a weak setting can't leave the app open.
+const appPassword = process.env.APP_PASSWORD ?? "";
+export const passwordLoginEnabled = appPassword.length >= 12;
+
+// Compare fingerprints of the two passwords in constant time, so an attacker
+// can't learn the password from how long the check takes.
+function passwordMatches(input: string) {
+  const a = createHash("sha256").update(input).digest();
+  const b = createHash("sha256").update(appPassword).digest();
+  return timingSafeEqual(a, b);
+}
+
+if (passwordLoginEnabled) {
+  providers.push(
+    Credentials({
+      id: "password",
+      name: "Password",
+      credentials: { email: { label: "Email" }, password: { label: "Password", type: "password" } },
+      async authorize(creds) {
+        const email = String(creds?.email ?? "").toLowerCase().trim();
+        const password = String(creds?.password ?? "");
+        if (!email || !password || !passwordMatches(password) || !isAllowed(email)) return null;
+        return db.user.upsert({ where: { email }, update: {}, create: { email, name: email.split("@")[0] } });
+      },
     }),
   );
 }
@@ -47,6 +78,7 @@ if (devLoginEnabled) {
 export const enabledProviders = {
   google: !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET),
   email: !!process.env.AUTH_RESEND_KEY,
+  password: passwordLoginEnabled,
   dev: devLoginEnabled,
 };
 

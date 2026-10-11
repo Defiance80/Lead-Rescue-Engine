@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BellRing, Mail, ShieldCheck, Zap } from "lucide-react";
+import { AuthError } from "next-auth";
 import { auth, enabledProviders, signIn } from "@/auth";
 import { Logo } from "@/components/logo";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 const ERRORS: Record<string, string> = {
+  CredentialsSignin: "That email and password combination didn't work. Check both and try again.",
   AccessDenied: "That account isn't on the guest list for this workspace.",
   Verification: "That sign-in link expired or was already used. Send a fresh one below.",
   Configuration: "Sign-in isn't fully set up yet. Check the environment variables.",
@@ -21,7 +23,7 @@ export default async function LoginPage({
   if (session?.user) redirect("/today");
   const { check, error } = await searchParams;
   const p = enabledProviders;
-  const nothingConfigured = !p.google && !p.email && !p.dev;
+  const nothingConfigured = !p.google && !p.email && !p.password && !p.dev;
 
   return (
     <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
@@ -92,7 +94,7 @@ export default async function LoginPage({
               <form
                 action={async () => {
                   "use server";
-                  await signIn("google", { redirectTo: "/today" });
+                  await safeSignIn("google", { redirectTo: "/today" });
                 }}
               >
                 <button className="btn w-full border border-white/10 bg-white py-3 text-[15px] text-slate-900 hover:bg-slate-100">
@@ -111,7 +113,7 @@ export default async function LoginPage({
               <form
                 action={async (formData: FormData) => {
                   "use server";
-                  await signIn("resend", { email: formData.get("email"), redirectTo: "/today" });
+                  await safeSignIn("resend", { email: formData.get("email"), redirectTo: "/today" });
                 }}
                 className="space-y-3"
               >
@@ -123,11 +125,41 @@ export default async function LoginPage({
               </form>
             )}
 
+            {p.password && (p.google || p.email) && (
+              <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-slate-500">
+                <span className="h-px flex-1 bg-white/10" /> or <span className="h-px flex-1 bg-white/10" />
+              </div>
+            )}
+
+            {p.password && (
+              <form
+                action={async (formData: FormData) => {
+                  "use server";
+                  await safeSignIn("password", {
+                    email: formData.get("email"),
+                    password: formData.get("password"),
+                    redirectTo: "/today",
+                  });
+                }}
+                className="space-y-3"
+              >
+                <div>
+                  <label className="label" htmlFor="pw-email">Email</label>
+                  <input id="pw-email" name="email" type="email" required autoComplete="email" placeholder="you@yourbrokerage.com" className="input py-3" />
+                </div>
+                <div>
+                  <label className="label" htmlFor="pw-password">Password</label>
+                  <input id="pw-password" name="password" type="password" required autoComplete="current-password" className="input py-3" />
+                </div>
+                <button className="btn-primary w-full py-3 text-[15px]">Sign in</button>
+              </form>
+            )}
+
             {p.dev && (
               <form
                 action={async (formData: FormData) => {
                   "use server";
-                  await signIn("dev", { email: formData.get("email"), redirectTo: "/today" });
+                  await safeSignIn("dev", { email: formData.get("email"), redirectTo: "/today" });
                 }}
                 className="space-y-3 rounded-xl border border-dashed border-amber-400/30 p-4"
               >
@@ -163,4 +195,17 @@ function GoogleIcon() {
       <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
     </svg>
   );
+}
+
+// A failed sign-in (wrong password, email not allowed…) throws an AuthError.
+// Turn it into a friendly message on this page instead of a crash screen.
+// Anything else (including Next.js's own redirect after success) passes through.
+async function safeSignIn(...args: Parameters<typeof signIn>) {
+  "use server";
+  try {
+    await signIn(...args);
+  } catch (err) {
+    if (err instanceof AuthError) redirect(`/login?error=${err.type}`);
+    throw err;
+  }
 }
