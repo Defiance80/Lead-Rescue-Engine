@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink-950: #05080f;
+  --color-ink-900: #0a0f1c;
+  --color-ink-850: #0e1526;
+  --color-ink-800: #121a2e;
+  --color-ink-700: #1a2440;
+  --color-ink-600: #263252;
+
+  --color-ember-300: #ffb199;
+  --color-ember-400: #ff8a65;
+  --color-ember-500: #ff5a36;
+  --color-ember-600: #e8431f;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-ink-950);
+  color: #e6e9f2;
+}
+
+body {
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgb(255 90 54 / 0.09), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgb(34 211 238 / 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Reusable building blocks (Tailwind v4 custom utilities) */
+@utility card {
+    @apply rounded-2xl border border-white/[0.07] bg-ink-850/80 shadow-[0_1px_0_0_rgb(255_255_255/0.04)_inset] backdrop-blur;
+}
+
+@utility card-pad {
+    @apply p-5 sm:p-6;
+}
+
+@utility btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-400/70 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+    @apply btn bg-gradient-to-r from-ember-500 to-rose-500 text-white shadow-lg shadow-ember-500/20 hover:brightness-110 active:brightness-95;
+}
+
+@utility btn-secondary {
+    @apply btn border border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08];
+}
+
+@utility btn-ghost {
+    @apply btn text-slate-300 hover:bg-white/[0.06] hover:text-white;
+}
+
+@utility btn-cyan {
+    @apply btn bg-cyan-400 text-ink-950 hover:bg-cyan-300;
+}
+
+@utility btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-lg;
+}
+
+@utility input {
+    @apply w-full rounded-xl border border-white/10 bg-ink-900 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500
+      focus:border-ember-400/60 focus:outline-none focus:ring-2 focus:ring-ember-400/20;
+}
+
+@utility label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400;
+}
+
+@utility eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400;
+}
+
+@utility chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset;
+}
+
+/* Slim scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.12) transparent;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgb(251 113 133 / 0.55); }
+  70% { box-shadow: 0 0 0 10px rgb(251 113 133 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(251 113 133 / 0); }
+}
+.pulse-ring { animation: pulse-ring 2s infinite; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.35s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring, .rise { animation: none; }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "lead-rescue-engine",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma db push --skip-generate && next build"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.3",
+    "@prisma/client": "^6.19.3",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.55.0",
+    "next": "^15.5.27",
+    "next-auth": "^5.0.0-beta.32",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.29",
+    "prisma": "^6.19.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
