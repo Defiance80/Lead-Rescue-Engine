@@ -93,7 +93,7 @@ export default async function LeadPage({
       {sp.rescued && <Banner tone="emerald" icon={CheckCircle2}>Rescued! This lead is back on track with a full follow-up plan.</Banner>}
 
       {/* Header */}
-      <section className="card relative overflow-hidden">
+      <section data-tour="lead-header" className="card relative overflow-hidden">
         <div className={clsx("absolute inset-x-0 top-0 h-1", t.bar)} />
         <div className="card-pad flex flex-col gap-6 lg:flex-row lg:items-center">
           <div className="flex min-w-0 flex-1 items-start gap-4">
@@ -154,7 +154,7 @@ export default async function LeadPage({
       <div className="grid gap-6 lg:grid-cols-[1.65fr_1fr]">
         <div className="space-y-6">
           {/* At a glance — the 7 questions */}
-          <section className="card card-pad">
+          <section data-tour="at-a-glance" className="card card-pad">
             <h2 className="mb-4 font-display text-base font-bold text-white">At a glance</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               <Glance icon={UserRound} tone="text-sky-300 bg-sky-400/10" q="Who" a={`${lead.firstName} ${lead.lastName ?? ""}`.trim()} sub={TYPE_LABEL[lead.leadType]} />
@@ -180,7 +180,7 @@ export default async function LeadPage({
           </section>
 
           {/* Follow-up plan */}
-          <section className="card card-pad">
+          <section data-tour="follow-up-plan" className="card card-pad">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-display text-base font-bold text-white">Follow-up plan</h2>
               <span className="text-xs text-slate-500">
@@ -274,7 +274,7 @@ export default async function LeadPage({
 
         {/* Right rail */}
         <div className="space-y-6">
-          <section className="card card-pad">
+          <section data-tour="log-it" className="card card-pad">
             <h2 className="mb-1 font-display text-base font-bold text-white">Log what happened</h2>
             <p className="mb-4 text-xs text-slate-500">One tap keeps the record straight.</p>
             <div className="grid grid-cols-2 gap-2">
@@ -291,7 +291,7 @@ export default async function LeadPage({
             </div>
           </section>
 
-          <section className="card card-pad">
+          <section data-tour="autopilot-card" className="card card-pad">
             <div className="flex items-start gap-3">
               <span className={clsx("grid h-10 w-10 place-items-center rounded-xl", lead.autopilot ? "bg-violet-400/15 text-violet-300" : "bg-white/5 text-slate-400")}>
                 <Send className="h-5 w-5" />
@@ -316,7 +316,7 @@ export default async function LeadPage({
             )}
           </section>
 
-          <section className="card card-pad">
+          <section data-tour="why-score" className="card card-pad">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-display text-base font-bold text-white">Why {lead.score}?</h2>
               <TierChip score={lead.score} />
@@ -334,7 +334,7 @@ export default async function LeadPage({
             <p className="mt-3 text-xs text-slate-500">{t.hint}.</p>
           </section>
 
-          <section className="card card-pad">
+          <section data-tour="stage" className="card card-pad">
             <h2 className="mb-3 font-display text-base font-bold text-white">Stage</h2>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(STATUS_META) as LeadStatus[]).map((s) => (

@@ -25,7 +25,7 @@ export default async function PriorityPage() {
         subtitle="The people most worth your time right now, best first. Work top to bottom and you can't go wrong."
         actions={
           lane.length > 0 && (
-            <Link href="/focus" className="btn-primary">
+            <Link href="/focus" data-tour="focus-button" className="btn-primary">
               <Crosshair className="h-4 w-4" /> One at a time
             </Link>
           )

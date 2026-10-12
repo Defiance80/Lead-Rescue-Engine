@@ -68,7 +68,7 @@ export default async function ScoreboardPage({ searchParams }: { searchParams: P
         title="Scoreboard"
         subtitle="Proof the system is working — and where your best leads really come from."
         actions={
-          <div className="flex rounded-xl border border-white/10 bg-white/[0.03] p-1">
+          <div data-tour="range" className="flex rounded-xl border border-white/10 bg-white/[0.03] p-1">
             {RANGES.map((r) => (
               <Link
                 key={r}
@@ -90,7 +90,7 @@ export default async function ScoreboardPage({ searchParams }: { searchParams: P
       </div>
 
       {/* Funnel */}
-      <section className="card card-pad">
+      <section data-tour="funnel" className="card card-pad">
         <h2 className="mb-5 font-display text-base font-bold text-white">From first hello to client</h2>
         <div className="space-y-3">
           {[
@@ -125,7 +125,7 @@ export default async function ScoreboardPage({ searchParams }: { searchParams: P
       </section>
 
       {/* Sources */}
-      <section className="card overflow-hidden">
+      <section data-tour="sources" className="card overflow-hidden">
         <div className="card-pad pb-3">
           <h2 className="font-display text-base font-bold text-white">Lead sources, ranked</h2>
           <p className="text-sm text-slate-500">Spend more where leads turn into conversations.</p>

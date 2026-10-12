@@ -75,7 +75,7 @@ export default async function TodayPage() {
       {/* Next move + momentum */}
       <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
         {move ? (
-          <div className="rise relative overflow-hidden rounded-3xl bg-gradient-to-br from-ember-500/90 via-rose-500/85 to-fuchsia-600/80 p-[1px]">
+          <div data-tour="next-move" className="rise relative overflow-hidden rounded-3xl bg-gradient-to-br from-ember-500/90 via-rose-500/85 to-fuchsia-600/80 p-[1px]">
             <div className="relative h-full rounded-[23px] bg-ink-900/85 p-6 sm:p-7">
               <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-ember-500/25 blur-3xl" />
               <div className="eyebrow flex items-center gap-2 text-ember-300">
@@ -117,7 +117,7 @@ export default async function TodayPage() {
           </div>
         )}
 
-        <div className="card card-pad flex items-center gap-6">
+        <div data-tour="momentum" className="card card-pad flex items-center gap-6">
           <Momentum pct={pct} />
           <div>
             <div className="eyebrow text-emerald-300">Today&apos;s momentum</div>
@@ -138,7 +138,7 @@ export default async function TodayPage() {
       </div>
 
       {/* Numbers */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+      <div data-tour="stats" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         <StatTile label="New today" value={stats.newToday} hint={`${stats.newWeek} this week`} icon={Inbox} tone="ember" href="/leads?sort=new" />
         <StatTile label="First reply speed" value={duration(stats.medianResponse)} hint="Typical, last 30 days" icon={Timer} tone="cyan" href="/scoreboard" />
         <StatTile label="Ready & Hot" value={hotCount} hint="Strong buying signals" icon={Flame} tone="rose" href="/priority" />
@@ -148,7 +148,7 @@ export default async function TodayPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Priority lane */}
-        <section>
+        <section data-tour="priority-lane">
           <SectionTitle
             dot="bg-rose-400"
             right={
@@ -170,7 +170,7 @@ export default async function TodayPage() {
 
         <div className="space-y-6">
           {/* Temperature */}
-          <section className="card card-pad">
+          <section data-tour="temperature" className="card card-pad">
             <SectionTitle>Pipeline temperature</SectionTitle>
             <div className="mb-4 flex h-3 overflow-hidden rounded-full bg-white/5">
               {stats.tiers.map((t) =>
@@ -311,7 +311,7 @@ function Welcome({ name }: { name: string }) {
           </p>
         </div>
       </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
+      <div data-tour="welcome-steps" className="mt-6 grid gap-4 md:grid-cols-3">
         {steps.map((s, i) => (
           <div key={s.title} className="card card-pad flex flex-col">
             <div className="flex items-center gap-3">

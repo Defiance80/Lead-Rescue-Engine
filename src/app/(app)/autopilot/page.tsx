@@ -57,7 +57,7 @@ export default async function AutopilotPage() {
         subtitle="Your follow-up runs itself — politely, on schedule, and it steps aside the moment someone wants you."
       />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div data-tour="autopilot-status" className="grid gap-4 md:grid-cols-3">
         <div className="card card-pad">
           <div className="eyebrow text-violet-300">Leads on autopilot</div>
           <div className="mt-2 font-display text-3xl font-bold text-white">{onCount}</div>
@@ -83,7 +83,7 @@ export default async function AutopilotPage() {
       </div>
 
       {/* Plan */}
-      <section className="card card-pad">
+      <section data-tour="autopilot-plan" className="card card-pad">
         <SectionTitle>The plan every new lead gets</SectionTitle>
         <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           {STEPS.map((s, idx) => (
@@ -106,7 +106,7 @@ export default async function AutopilotPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section>
+        <section data-tour="autopilot-ready">
           <SectionTitle dot="bg-amber-300">
             Ready to send <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-bold text-slate-300">{ready.length}</span>
           </SectionTitle>

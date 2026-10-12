@@ -72,7 +72,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       />
 
       {/* Temperature filter */}
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div data-tour="tier-filters" className="mb-4 flex flex-wrap gap-2">
         <Link
           href={href({ tier: undefined })}
           className={clsx("chip px-3.5 py-1.5 text-[13px]", !tier ? "bg-white text-ink-950 ring-white" : "bg-white/5 text-slate-300 ring-white/10 hover:bg-white/10")}
@@ -95,7 +95,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       </div>
 
       {/* Search + secondary filters */}
-      <form className="mb-6 flex flex-col gap-2 sm:flex-row" action="/leads">
+      <form data-tour="lead-search" className="mb-6 flex flex-col gap-2 sm:flex-row" action="/leads">
         {tier && <input type="hidden" name="tier" value={tier.key} />}
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />

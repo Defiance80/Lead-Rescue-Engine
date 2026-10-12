@@ -113,7 +113,7 @@ export function FocusDeck({ cards: initial }: { cards: FocusCard[] }) {
   return (
     <div className="mx-auto max-w-3xl">
       {/* Progress */}
-      <div className="mb-6 flex items-center gap-4">
+      <div data-tour="focus-progress" className="mb-6 flex items-center gap-4">
         <div className="eyebrow text-fuchsia-300">Focus Mode</div>
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/5">
           <div className="h-full rounded-full bg-gradient-to-r from-ember-500 via-rose-500 to-fuchsia-500 transition-all duration-500" style={{ width: `${progress}%` }} />
@@ -123,7 +123,7 @@ export function FocusDeck({ cards: initial }: { cards: FocusCard[] }) {
         </div>
       </div>
 
-      <div key={card.id} className="rise relative overflow-hidden rounded-3xl border border-white/[0.08] bg-ink-850">
+      <div key={card.id} data-tour="focus-card" className="rise relative overflow-hidden rounded-3xl border border-white/[0.08] bg-ink-850">
         <div className={clsx("h-1.5", t.bar)} />
         <div className="p-6 sm:p-8">
           <div className="flex flex-wrap items-center gap-2">
@@ -154,7 +154,7 @@ export function FocusDeck({ cards: initial }: { cards: FocusCard[] }) {
           )}
 
           {card.touch && (
-            <div className="mt-6">
+            <div data-tour="focus-send" className="mt-6">
               <div className="eyebrow mb-2">Ready-to-send {card.touch.channel === "SMS" ? "text" : "email"} · {card.touch.label}</div>
               <p className="whitespace-pre-line rounded-xl bg-ink-950/70 p-4 text-sm leading-relaxed text-slate-200">{card.touch.message}</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -175,7 +175,7 @@ export function FocusDeck({ cards: initial }: { cards: FocusCard[] }) {
             </div>
           )}
 
-          <div className="mt-8 border-t border-white/5 pt-6">
+          <div data-tour="focus-other" className="mt-8 border-t border-white/5 pt-6">
             <div className="eyebrow mb-3">Reached them another way?</div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {card.phone ? (

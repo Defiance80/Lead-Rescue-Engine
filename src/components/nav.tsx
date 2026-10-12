@@ -62,13 +62,15 @@ function isActive(path: string, href: string) {
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const path = usePathname();
   return (
-    <nav className="flex flex-1 flex-col gap-6">
-      <Link href="/leads/new" className="btn-primary w-full">
+    // min-h-0 + overflow-y-auto lets this middle area scroll on its own when the
+    // window is short, while the logo and account card stay pinned.
+    <nav className="-mx-2 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-2 pb-2">
+      <Link href="/leads/new" data-tour="add-lead" className="btn-primary w-full shrink-0">
         <Plus className="h-4 w-4" /> Add a lead
       </Link>
       {GROUPS.map((g) => (
-        <div key={g.title}>
-          <div className="eyebrow mb-2 px-3 text-slate-500">{g.title}</div>
+        <div key={g.title} data-tour={`nav-${g.title.toLowerCase().replace(/\s+/g, "-")}`}>
+          <div className="eyebrow mb-2 px-3 text-white/60">{g.title}</div>
           <ul className="space-y-0.5">
             {g.items.map((it) => {
               const active = isActive(path, it.href) && !(it.href === "/leads" && path === "/leads/new");
@@ -79,10 +81,10 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
                     href={it.href}
                     className={clsx(
                       "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
-                      active ? "bg-white/[0.07] text-white shadow-[inset_2px_0_0_0] shadow-ember-400" : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-100",
+                      active ? "bg-white/[0.09] text-white shadow-[inset_2px_0_0_0] shadow-ember-400" : "text-white hover:bg-white/[0.06]",
                     )}
                   >
-                    <it.icon className={clsx("h-[18px] w-[18px]", active ? it.color : "text-slate-500 group-hover:text-slate-200")} />
+                    <it.icon className={clsx("h-[18px] w-[18px]", active ? it.color : "text-white/70 group-hover:text-white")} />
                     <span className="flex-1">{it.label}</span>
                     {n > 0 && it.badge && (
                       <span className={clsx("min-w-6 rounded-full px-1.5 py-0.5 text-center text-[11px] font-bold", it.badge)}>{n}</span>
@@ -94,12 +96,12 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
           </ul>
         </div>
       ))}
-      <div className="mt-auto">
+      <div className="mt-auto" data-tour="nav-settings">
         <Link
           href="/settings"
           className={clsx(
-            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
-            path.startsWith("/settings") ? "bg-white/[0.07] text-white" : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-100",
+            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white transition",
+            path.startsWith("/settings") ? "bg-white/[0.09]" : "hover:bg-white/[0.06]",
           )}
         >
           <Settings className="h-[18px] w-[18px]" /> Settings & Connections
@@ -112,7 +114,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
 export function MobileNav({ counts }: { counts: NavCounts }) {
   const path = usePathname();
   return (
-    <nav className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
+    <nav data-tour="mobile-nav" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
       {[...ALL, { href: "/settings", label: "Settings", icon: Settings, color: "text-slate-300" } as NavItem].map((it) => {
         const active = isActive(path, it.href);
         const n = it.count ? counts[it.count] : 0;
@@ -122,7 +124,7 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
             href={it.href}
             className={clsx(
               "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset",
-              active ? "bg-white/10 text-white ring-white/15" : "text-slate-400 ring-white/5",
+              active ? "bg-white/15 text-white ring-white/25" : "text-white ring-white/10",
             )}
           >
             <it.icon className={clsx("h-3.5 w-3.5", it.color)} />

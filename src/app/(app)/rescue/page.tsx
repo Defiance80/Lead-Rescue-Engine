@@ -56,7 +56,7 @@ export default async function RescuePage({ searchParams }: { searchParams: Promi
           Every lead that came in was processed cleanly. If something ever arrives broken, it lands here instead of vanishing.
         </EmptyState>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div data-tour="rescue-cards" className="grid gap-4 xl:grid-cols-2">
           {issues.map((iss) => {
             const k = KIND[iss.kind] ?? KIND.bad_payload;
             const n = normalizeLead(iss.payload);

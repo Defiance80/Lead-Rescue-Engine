@@ -58,7 +58,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         </div>
       )}
 
-      <form action={updateSettingsAction} className="card card-pad space-y-6">
+      <form data-tour="settings-profile" action={updateSettingsAction} className="card card-pad space-y-6">
         <SectionHead icon={UserRound} tone="bg-cyan-400/10 text-cyan-300" title="How you sound" text="Used to sign every message so it reads like it came from you." />
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
@@ -103,7 +103,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         </div>
       </form>
 
-      <section id="connections" className="card card-pad scroll-mt-24 space-y-5">
+      <section id="connections" data-tour="connections" className="card card-pad scroll-mt-24 space-y-5">
         <SectionHead icon={PlugZap} tone="bg-violet-400/10 text-violet-300" title="Connections" text="Your private links. Anyone with these can add leads to your account — share them only with your automation tools." />
         <div className="space-y-3">
           {urls.map((u) => (
