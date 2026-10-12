@@ -98,7 +98,7 @@ export default async function LoginPage({
           )}
           {error && (
             <div className="mt-6 rounded-xl border border-rose-400/30 bg-rose-500/10 p-4 text-sm text-rose-100">
-              {(code && SIGNIN_CODES[code]) ?? ERRORS[error] ?? "Something went wrong signing in. Please try again."}
+              {(code && SIGNIN_CODES[code]) ?? ERRORS[error] ?? `Something went wrong signing in (${error}). Please try again.`}
             </div>
           )}
 
@@ -154,6 +154,9 @@ export default async function LoginPage({
 
           <p className="mt-10 text-xs leading-relaxed text-slate-500">
             By signing in you agree to use automated messaging only with leads who have opted in.
+          </p>
+          <p className="mt-3 text-[11px] text-slate-600">
+            Version {(process.env.VERCEL_GIT_COMMIT_SHA ?? "local").slice(0, 7)}
           </p>
         </div>
       </section>

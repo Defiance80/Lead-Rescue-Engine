@@ -81,6 +81,9 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
           Already have an account?{" "}
           <Link href="/login" className="font-semibold text-ember-300 hover:text-ember-200">Sign in</Link>
         </p>
+        <p className="mt-3 text-center text-[11px] text-slate-600">
+          Version {(process.env.VERCEL_GIT_COMMIT_SHA ?? "local").slice(0, 7)}
+        </p>
       </div>
     </main>
   );
