@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   Gauge,
@@ -61,16 +62,38 @@ function isActive(path: string, href: string) {
 
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const path = usePathname();
+  const ref = useRef<HTMLElement>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  // Show a "more below" fade whenever the menu is taller than the window and
+  // you haven't scrolled to the bottom yet.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
+    check();
+    // Re-check when sizes change (window resize, fonts finishing loading…).
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    Array.from(el.children).forEach((c) => ro.observe(c));
+    el.addEventListener("scroll", check);
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("scroll", check);
+    };
+  }, []);
+
   return (
-    // min-h-0 + overflow-y-auto lets this middle area scroll on its own when the
-    // window is short, while the logo and account card stay pinned.
-    <nav className="-mx-2 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-2 pb-2">
-      <Link href="/leads/new" data-tour="add-lead" className="btn-primary w-full shrink-0">
+    <div className="relative flex min-h-0 flex-1 flex-col">
+    {/* min-h-0 + overflow-y-auto lets this middle area scroll on its own when
+        the window is short, while the logo and account card stay pinned. */}
+    <nav ref={ref} className="sidebar-scroll -mx-2 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-2 pb-2 short:gap-3">
+      <Link href="/leads/new" data-tour="add-lead" className="btn-primary w-full shrink-0 short:py-2">
         <Plus className="h-4 w-4" /> Add a lead
       </Link>
       {GROUPS.map((g) => (
         <div key={g.title} data-tour={`nav-${g.title.toLowerCase().replace(/\s+/g, "-")}`}>
-          <div className="eyebrow mb-2 px-3 text-white/60">{g.title}</div>
+          <div className="eyebrow mb-2 px-3 text-white/60 short:mb-1">{g.title}</div>
           <ul className="space-y-0.5">
             {g.items.map((it) => {
               const active = isActive(path, it.href) && !(it.href === "/leads" && path === "/leads/new");
@@ -80,7 +103,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
                   <Link
                     href={it.href}
                     className={clsx(
-                      "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+                      "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition short:py-1.5",
                       active ? "bg-white/[0.09] text-white shadow-[inset_2px_0_0_0] shadow-ember-400" : "text-white hover:bg-white/[0.06]",
                     )}
                   >
@@ -100,7 +123,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
         <Link
           href="/settings"
           className={clsx(
-            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white transition",
+            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white transition short:py-1.5",
             path.startsWith("/settings") ? "bg-white/[0.09]" : "hover:bg-white/[0.06]",
           )}
         >
@@ -108,6 +131,12 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
         </Link>
       </div>
     </nav>
+    {moreBelow && (
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-14 items-end justify-center bg-gradient-to-t from-ink-900 to-transparent pb-1">
+        <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white">More below ↓</span>
+      </div>
+    )}
+    </div>
   );
 }
 

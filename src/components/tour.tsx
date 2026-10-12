@@ -416,8 +416,10 @@ export function Tour() {
   return (
     <>
       {helpButton}
-      {/* Click-catcher (keeps the page from being clicked mid-tour) */}
-      <div className="fixed inset-0 z-[60]" onClick={(e) => e.stopPropagation()} aria-hidden />
+      {/* Clicking anywhere on the dimmed area closes the tour, so it can never
+          leave the page stuck (e.g. if the card ends up off-screen). Scrolling
+          still works underneath. */}
+      <div className="fixed inset-0 z-[60] cursor-pointer" onClick={close} title="Click to close the tour" aria-hidden />
       {rect ? (
         <div
           aria-hidden

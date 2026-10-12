@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* short: applies on windows under 820px tall (laptops, zoomed-in browsers) */
+@custom-variant short (@media (max-height: 820px));
+
 @theme {
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-grotesk), var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -84,6 +87,11 @@ body {
 @utility chip {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset;
 }
+
+/* Sidebar: always show a visible scrollbar thumb so it's clear it scrolls */
+.sidebar-scroll::-webkit-scrollbar { width: 6px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgb(255 255 255 / 0.25); border-radius: 9999px; }
+.sidebar-scroll { scrollbar-color: rgb(255 255 255 / 0.25) transparent; }
 
 /* Slim scrollbars */
 * {
