@@ -62,32 +62,8 @@ function isActive(path: string, href: string) {
 
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const path = usePathname();
-  const ref = useRef<HTMLElement>(null);
-  const [moreBelow, setMoreBelow] = useState(false);
-
-  // Show a "more below" fade whenever the menu is taller than the window and
-  // you haven't scrolled to the bottom yet.
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const check = () => setMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
-    check();
-    // Re-check when sizes change (window resize, fonts finishing loading…).
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    Array.from(el.children).forEach((c) => ro.observe(c));
-    el.addEventListener("scroll", check);
-    return () => {
-      ro.disconnect();
-      el.removeEventListener("scroll", check);
-    };
-  }, []);
-
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col">
-    {/* min-h-0 + overflow-y-auto lets this middle area scroll on its own when
-        the window is short, while the logo and account card stay pinned. */}
-    <nav ref={ref} className="sidebar-scroll -mx-2 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-2 pb-2 short:gap-3">
+    <nav className="flex flex-col gap-6 short:gap-3">
       <Link href="/leads/new" data-tour="add-lead" className="btn-primary w-full shrink-0 short:py-2">
         <Plus className="h-4 w-4" /> Add a lead
       </Link>
@@ -119,7 +95,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
           </ul>
         </div>
       ))}
-      <div className="mt-auto" data-tour="nav-settings">
+      <div data-tour="nav-settings">
         <Link
           href="/settings"
           className={clsx(
@@ -131,11 +107,52 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
         </Link>
       </div>
     </nav>
-    {moreBelow && (
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-14 items-end justify-center bg-gradient-to-t from-ink-900 to-transparent pb-1">
-        <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white">More below ↓</span>
-      </div>
-    )}
+  );
+}
+
+// The whole sidebar is one scrollable panel. Extra space at the bottom means
+// the last options can always be scrolled into view — even when the bottom of
+// the browser window is hidden behind the computer's taskbar.
+export function SidebarScroll({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null); // marks the end of the real menu
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // "More below" only while real menu items are still out of view.
+    const check = () => {
+      const end = endRef.current?.getBoundingClientRect().top ?? 0;
+      setMoreBelow(end > el.getBoundingClientRect().bottom - 4);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    Array.from(el.children).forEach((c) => ro.observe(c));
+    el.addEventListener("scroll", check);
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("scroll", check);
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className="sidebar-scroll h-full overflow-y-auto overscroll-contain px-4 py-6 short:py-3">
+      {children}
+      <div ref={endRef} aria-hidden />
+      <div className="h-24 shrink-0" aria-hidden />
+      {moreBelow && (
+        <div className="pointer-events-none sticky bottom-0 -mx-4 -mt-14 flex h-14 items-end justify-center bg-gradient-to-t from-ink-900 via-ink-900/80 to-transparent pb-2">
+          <button
+            type="button"
+            onClick={() => ref.current?.scrollBy({ top: 240, behavior: "smooth" })}
+            className="pointer-events-auto rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white hover:bg-white/25"
+          >
+            More below ↓
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { LogOut, Plus } from "lucide-react";
 import { requireUser, agentFirstName } from "@/lib/session";
 import { openIssueCount, priorityLane, safetyNetCount } from "@/lib/queries";
 import { Logo } from "@/components/logo";
-import { MobileNav, Sidebar } from "@/components/nav";
+import { MobileNav, Sidebar, SidebarScroll } from "@/components/nav";
 import { Avatar } from "@/components/ui";
 import { signOutAction } from "../actions";
 import { Tour } from "@/components/tour";
@@ -21,12 +21,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="lg:pl-72">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-20 hidden h-dvh w-72 flex-col border-r border-white/[0.06] bg-ink-900/95 px-4 py-6 backdrop-blur-xl lg:flex short:py-3">
-        <Link href="/today" className="mb-6 shrink-0 px-2 short:mb-3">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden h-dvh w-72 border-r border-white/[0.06] bg-ink-900/95 backdrop-blur-xl lg:block">
+        <SidebarScroll>
+        <Link href="/today" className="mb-6 block px-2 short:mb-3">
           <Logo />
         </Link>
         <Sidebar counts={counts} />
-        <div className="mt-3 flex shrink-0 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 short:mt-2 short:p-2">
+        <div className="mt-6 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 short:mt-3 short:p-2">
           <Avatar first={name} size="sm" />
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold text-white">{user.displayName || user.name || name}</div>
@@ -38,6 +39,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </button>
           </form>
         </div>
+        </SidebarScroll>
       </aside>
 
       {/* Mobile header */}
