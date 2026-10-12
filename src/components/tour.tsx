@@ -24,7 +24,7 @@ const TOURS: Record<string, Step[]> = {
     {
       target: ["nav-act-now", "mobile-nav"],
       title: "Act now",
-      body: "Today is home base. Priority Lane lists who's worth your time, best first. Focus Mode shows one lead at a time with nothing else on screen.",
+      body: "Today is home base. Priority Lane lists who's worth your time, best first. Focus Mode shows one lead at a time. Inbox Assistant reads your email and covers you when you're busy.",
     },
     {
       target: "nav-protect",
@@ -34,7 +34,7 @@ const TOURS: Record<string, Step[]> = {
     {
       target: "nav-pipeline",
       title: "Pipeline",
-      body: "All Leads is everyone in one place. Autopilot shows the follow-up messages going out on their own. Scoreboard shows what's working.",
+      body: "All Leads is everyone in one place. Autopilot shows the follow-up messages going out on their own. Scoreboard shows what's working. Export & Sync sends leads to Mailchimp, HubSpot and more.",
     },
     {
       target: ["add-lead", "mobile-add-lead"],
@@ -107,6 +107,11 @@ const TOURS: Record<string, Step[]> = {
       target: "why-score",
       title: "Why this score",
       body: "What pushed this lead up or down. Higher means more ready to move.",
+    },
+    {
+      target: "priority",
+      title: "Priority",
+      body: "Automatic by default (based on score and activity). Tap High, Medium or Low to set it yourself — it carries into exports.",
     },
     {
       target: "stage",
@@ -223,6 +228,50 @@ const TOURS: Record<string, Step[]> = {
       target: "connections",
       title: "Connections",
       body: "Private links for bringing leads in automatically. Usually set up once, by whoever handles your automations.",
+    },
+  ],
+  inbox: [
+    {
+      target: "inbox-connect",
+      title: "Connect your email",
+      body: "Pick your provider, create an app password with the steps shown, and connect. The assistant reads new emails from then on.",
+    },
+    {
+      target: "inbox-stats",
+      title: "Your inbox at a glance",
+      body: "What needs you, what the assistant is covering, new leads it found today, and what it handled for you.",
+    },
+    {
+      target: "inbox-tabs",
+      title: "Sorted for you",
+      body: "Needs attention shows drafts waiting for a tap and anything flagged. Leads shows every new inquiry. Handled is what's done.",
+    },
+    {
+      target: "inbox-list",
+      title: "Every email, sorted",
+      body: "Each email gets a category, Hot / Warm / Cold, and a priority. The purple timer shows when the assistant will cover it if you haven't replied. Tap an email to see details and the ready-made reply.",
+    },
+    {
+      target: "inbox-settings",
+      title: "You're in control",
+      body: "Choose whether replies wait for your tap or send on their own, how long to wait, and how they're signed. Flagged emails are never sent automatically.",
+    },
+  ],
+  export: [
+    {
+      target: "export-filters",
+      title: "Choose who",
+      body: "Pick Hot, Warm or Cold, a priority, a source, or a date. Everything below uses this selection.",
+    },
+    {
+      target: "export-download",
+      title: "Download for any platform",
+      body: "Each button makes a file shaped for that platform's importer — Mailchimp, HubSpot, Follow Up Boss, Google Contacts, or a full spreadsheet.",
+    },
+    {
+      target: "export-sync",
+      title: "Or send them straight in",
+      body: "Connect Mailchimp or HubSpot once, then push leads with one tap. New contacts are added and existing ones updated.",
     },
   ],
   new: [

@@ -15,9 +15,11 @@ import {
   Trophy,
   Settings,
   Plus,
+  MailOpen,
+  FileDown,
 } from "lucide-react";
 
-export type NavCounts = { priority: number; safety: number; rescue: number };
+export type NavCounts = { priority: number; safety: number; rescue: number; inbox: number };
 
 type NavItem = {
   href: string;
@@ -35,6 +37,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/today", label: "Today", icon: Gauge, color: "text-ember-400" },
       { href: "/priority", label: "Priority Lane", icon: Flame, color: "text-rose-400", count: "priority", badge: "bg-rose-500 text-white" },
       { href: "/focus", label: "Focus Mode", icon: Crosshair, color: "text-fuchsia-400" },
+      { href: "/inbox", label: "Inbox Assistant", icon: MailOpen, color: "text-violet-300", count: "inbox", badge: "bg-violet-400 text-ink-950" },
     ],
   },
   {
@@ -50,6 +53,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/leads", label: "All Leads", icon: Users, color: "text-sky-300" },
       { href: "/autopilot", label: "Autopilot", icon: Send, color: "text-violet-300" },
       { href: "/scoreboard", label: "Scoreboard", icon: Trophy, color: "text-emerald-300" },
+      { href: "/export", label: "Export & Sync", icon: FileDown, color: "text-teal-300" },
     ],
   },
 ];

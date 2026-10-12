@@ -21,7 +21,7 @@ export type IngestResult =
   | { outcome: "queued"; issueId: string; reason: string };
 
 type Options = {
-  actor?: "n8n" | "agent" | "webhook";
+  actor?: "n8n" | "agent" | "webhook" | "assistant";
   isSample?: boolean;
   createdAt?: Date;
   trusted?: boolean; // a human already looked at it — skip the spam check
@@ -128,6 +128,7 @@ export async function ingestLead(userId: string, payload: unknown, opts: Options
   const agent = {
     name: agentFirstName(user),
     business: user.businessName,
+    bookingUrl: user.bookingUrl,
   };
 
   const signals: SignalKey[] = Array.from(

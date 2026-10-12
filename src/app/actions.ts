@@ -116,6 +116,16 @@ export async function setStatusAction(leadId: string, status: LeadStatus) {
   refresh();
 }
 
+export async function setPriorityAction(leadId: string, priority: number | null) {
+  await ownLead(leadId);
+  const label = priority === 1 ? "High" : priority === 2 ? "Medium" : priority === 3 ? "Low" : "Automatic";
+  await db.lead.update({
+    where: { id: leadId },
+    data: { priority, activities: { create: { kind: "status", actor: "agent", title: `Priority → ${label}` } } },
+  });
+  refresh();
+}
+
 export async function doNotContactAction(leadId: string) {
   await ownLead(leadId);
   await db.lead.update({
@@ -251,6 +261,16 @@ export async function updateSettingsAction(formData: FormData) {
       timezone: str(formData.get("timezone")) ?? user.timezone,
       quietStart: hour(formData.get("quietStart"), user.quietStart),
       quietEnd: hour(formData.get("quietEnd"), user.quietEnd),
+      bookingUrl: (() => {
+        const u = str(formData.get("bookingUrl"));
+        if (!u) return null;
+        const withScheme = /^https?:\/\//i.test(u) ? u : `https://${u}`;
+        try {
+          return new URL(withScheme).toString();
+        } catch {
+          return null;
+        }
+      })(),
       onboarded: true,
     },
   });

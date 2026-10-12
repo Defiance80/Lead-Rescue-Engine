@@ -14,19 +14,25 @@
     "vercel-build": "prisma generate && DATABASE_URL=\"${DATABASE_URL_UNPOOLED:-$DATABASE_URL}\" prisma db push --skip-generate && next build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
     "@auth/prisma-adapter": "^2.11.3",
     "@prisma/client": "^6.19.3",
     "clsx": "^2.1.1",
+    "imapflow": "^2.4.0",
     "lucide-react": "^1.55.0",
+    "mailparser": "^3.9.38",
     "next": "^15.5.27",
     "next-auth": "^5.0.0-beta.32",
+    "nodemailer": "^8.0.11",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@types/mailparser": "^3.9.0",
     "@types/node": "^26.6.5",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "postcss": "^8.5.29",

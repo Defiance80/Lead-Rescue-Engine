@@ -75,6 +75,12 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           </div>
         </div>
 
+        <div>
+          <label className="label" htmlFor="bookingUrl">Booking link</label>
+          <input id="bookingUrl" name="bookingUrl" type="url" defaultValue={user.bookingUrl ?? ""} placeholder="https://calendly.com/your-name/15min" className="input" />
+          <p className="mt-1.5 text-xs text-slate-500">Calendly, Google Calendar booking page, or any scheduling link. Added to the end of follow-up emails and Inbox Assistant replies.</p>
+        </div>
+
         <div className="border-t border-white/5 pt-6">
           <SectionHead icon={Moon} tone="bg-sky-400/10 text-sky-300" title="Quiet hours" text="Autopilot never sends texts or emails during these hours. Messages wait until morning." />
           <div className="mt-4 grid gap-4 sm:grid-cols-3">

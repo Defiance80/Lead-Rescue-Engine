@@ -25,7 +25,9 @@ and **Tailwind CSS**. Hosts on **Vercel**. Pairs with **n8n** for sending texts/
 | **Lead profile** | "At a glance" answers (who, where from, interested in, reply speed, engaged?, next step), follow-up plan, timeline, score breakdown |
 | **Autopilot** | The follow-up plan, what's ready to send, what's coming this week |
 | **Scoreboard** | Response speed, funnel, rescued leads, source ROI |
-| **Settings** | Your name in messages, quiet hours, private webhook links, n8n download, sample data |
+| **Inbox Assistant** | Reads new primary emails, sorts them (lead / client / vendor / junk), marks Hot·Warm·Cold + priority, pulls out contact details, adds leads to the pipeline, and covers you with a brief reply if you haven't answered in your set time |
+| **Export & Sync** | CSV files shaped for Mailchimp, HubSpot, Follow Up Boss, Google Contacts or a full spreadsheet — or push straight into Mailchimp / HubSpot |
+| **Settings** | Your name in messages, booking link, quiet hours, private webhook links, n8n download, sample data |
 
 **Temperature tiers** (same colors everywhere): Ready Now (80+) · Hot (60–79) · Warming Up (40–59) · Nurture (20–39) · Long Game (0–19).
 
@@ -78,6 +80,36 @@ Add `CRON_SECRET` (any random string). Vercel Cron calls `/api/cron` once a day
 Click **Deploy**. Sign in, then on the **Today** screen click **Load sample leads** to explore.
 
 ---
+
+## Inbox Assistant
+
+1. **Optional but recommended:** add `ANTHROPIC_API_KEY` in Vercel for AI sorting and replies
+   written for each email (without it, a basic keyword mode is used).
+2. Add `ENCRYPTION_KEY` (any long random string — never change it afterwards) and `CRON_SECRET`.
+3. In the app: **Inbox Assistant → pick your provider → create an app password → Test & connect.**
+4. Choose what happens when the timer runs out: *Have a draft ready for me* (default) or
+   *Send the reply for me*, and how long to wait (15 min – next day).
+5. Add your **booking link** in Settings — it's added to the end of assistant replies and follow-up emails.
+
+**How it decides:** every new primary email is read once. Newsletters and no-reply senders are
+filed automatically. Everything else gets a category, Hot/Warm/Cold, a priority, a summary,
+extracted contact details and a ready-made reply. New inquiries become leads (or are merged into
+existing ones). Replies you send yourself are noticed in your Sent folder and the assistant stands
+down. Emails about wire/bank instructions, Fair Housing-sensitive topics, complaints or legal
+matters are **never** answered automatically.
+
+**Checking every few minutes:** the inbox is checked whenever the Inbox Assistant page is open
+and once a day by Vercel Cron. For round-the-clock checks, create a free job at
+[cron-job.org](https://cron-job.org) that opens
+`https://YOUR-APP.vercel.app/api/cron/inbox?key=YOUR_CRON_SECRET` every 5 minutes
+(or use Vercel Pro cron, or an n8n Schedule → HTTP Request).
+
+## Export & Sync
+
+Pick who (Hot / Warm / Cold, priority, source, date), then either download a CSV for
+**Mailchimp, HubSpot, Follow Up Boss, Google Contacts** or a full spreadsheet, or connect
+Mailchimp (API key + audience ID) / HubSpot (private app token) once and push with one tap.
+Mailchimp pushes ask new contacts to confirm by default (double opt-in) to keep you compliant.
 
 ## Connect n8n
 

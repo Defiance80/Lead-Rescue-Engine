@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogOut, Plus } from "lucide-react";
 import { requireUser, agentFirstName } from "@/lib/session";
+import { db } from "@/lib/db";
 import { openIssueCount, priorityLane, safetyNetCount } from "@/lib/queries";
 import { Logo } from "@/components/logo";
 import { MobileNav, Sidebar, SidebarScroll } from "@/components/nav";
@@ -10,12 +11,13 @@ import { Tour } from "@/components/tour";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
-  const [priority, safety, rescue] = await Promise.all([
+  const [priority, safety, rescue, inbox] = await Promise.all([
     priorityLane(user.id, 99).then((l) => l.length),
     safetyNetCount(user.id),
     openIssueCount(user.id),
+    db.inboxItem.count({ where: { userId: user.id, status: { in: ["ready", "held"] } } }),
   ]);
-  const counts = { priority, safety, rescue };
+  const counts = { priority, safety, rescue, inbox };
   const name = agentFirstName(user);
 
   return (

@@ -32,6 +32,7 @@ import { explainSignals } from "@/lib/intake";
 import { nextMoveFor } from "@/lib/queries";
 import { ago, duration, priceRange } from "@/lib/time";
 import { tierFor } from "@/lib/tiers";
+import { effectivePriority, PRIORITIES, priorityMeta, temperatureFor, tempMeta } from "@/lib/temperature";
 import { Avatar, ScoreRing, STATUS_META, StatusChip, TierChip } from "@/components/ui";
 import { ActionButton, CopyButton, SendTouchButton, SpeedClock } from "@/components/client";
 import {
@@ -43,6 +44,7 @@ import {
   markTouchAction,
   recordEventAction,
   setAutopilotAction,
+  setPriorityAction,
   setStatusAction,
   snoozeAction,
   updateLeadAction,
@@ -104,6 +106,8 @@ export default async function LeadPage({
               </h1>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <TierChip score={lead.score} />
+                <span className={clsx("chip", tempMeta(temperatureFor(lead.score)).chip)}>{tempMeta(temperatureFor(lead.score)).label}</span>
+                <span className={clsx("chip", priorityMeta(effectivePriority(lead)).chip)}>{priorityMeta(effectivePriority(lead)).label} priority</span>
                 <StatusChip status={lead.status} />
                 <SpeedClock since={lead.createdAt.toISOString()} respondedAt={lead.firstResponseAt?.toISOString() ?? null} />
                 {lead.autopilot ? (
@@ -332,6 +336,30 @@ export default async function LeadPage({
               ))}
             </ul>
             <p className="mt-3 text-xs text-slate-500">{t.hint}.</p>
+          </section>
+
+          <section data-tour="priority" className="card card-pad">
+            <h2 className="mb-1 font-display text-base font-bold text-white">Priority</h2>
+            <p className="mb-3 text-xs text-slate-500">
+              {lead.priority ? "Set by you." : `Automatic — currently ${priorityMeta(effectivePriority(lead)).label.toLowerCase()}, based on score and activity.`}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <ActionButton
+                action={setPriorityAction.bind(null, lead.id, null)}
+                className={clsx("chip cursor-pointer px-3 py-1.5", !lead.priority ? "bg-white text-ink-950 ring-white" : "bg-white/[0.03] text-slate-300 ring-white/10 hover:text-white")}
+              >
+                Automatic
+              </ActionButton>
+              {PRIORITIES.map((p) => (
+                <ActionButton
+                  key={p.value}
+                  action={setPriorityAction.bind(null, lead.id, p.value)}
+                  className={clsx("chip cursor-pointer px-3 py-1.5", lead.priority === p.value ? p.chip + " ring-2" : "bg-white/[0.03] text-slate-300 ring-white/10 hover:text-white")}
+                >
+                  {p.label}
+                </ActionButton>
+              ))}
+            </div>
           </section>
 
           <section data-tour="stage" className="card card-pad">

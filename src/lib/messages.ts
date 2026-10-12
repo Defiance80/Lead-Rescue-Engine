@@ -19,6 +19,7 @@ export type LeadContext = {
 export type AgentContext = {
   name: string; // "Ian"
   business?: string | null;
+  bookingUrl?: string | null; // added near the end of emails
 };
 
 export type PlannedTouch = {
@@ -45,7 +46,8 @@ function asksAboutStatus(inquiry?: string | null) {
 }
 
 function signoff(a: AgentContext) {
-  return a.business ? `${a.name}\n${a.business}` : a.name;
+  const booking = a.bookingUrl ? `If it's easier, grab a time that works for you here:\n${a.bookingUrl}\n\n` : "";
+  return booking + (a.business ? `${a.name}\n${a.business}` : a.name);
 }
 
 export function buildPlan(lead: LeadContext, agent: AgentContext): PlannedTouch[] {

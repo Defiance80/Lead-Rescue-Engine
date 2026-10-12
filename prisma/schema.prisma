@@ -23,19 +23,27 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Agent settings
-  displayName   String? // how the agent signs messages ("Ian")
-  businessName  String? // optional brokerage/team name for email signatures
-  phone         String?
-  timezone      String  @default("America/Los_Angeles")
-  quietStart    Int     @default(21) // no automated messages from 9pm…
-  quietEnd      Int     @default(8) //  …until 8am (agent's local time)
-  intakeToken   String  @unique @default(uuid()) // secret used in webhook URLs
-  onboarded     Boolean @default(false)
+  displayName  String? // how the agent signs messages ("Ian")
+  businessName String? // optional brokerage/team name for email signatures
+  phone        String?
+  timezone     String  @default("America/Los_Angeles")
+  quietStart   Int     @default(21) // no automated messages from 9pm…
+  quietEnd     Int     @default(8) //  …until 8am (agent's local time)
+  intakeToken  String  @unique @default(uuid()) // secret used in webhook URLs
+  onboarded    Boolean @default(false)
+  bookingUrl   String? // e.g. Calendly link, added to the end of assistant emails
+
+  // Export & Sync connections (stored encrypted)
+  mailchimpKeyEnc String?
+  mailchimpListId String?
+  hubspotTokenEnc String?
 
   accounts Account[]
   sessions Session[]
   leads    Lead[]
   issues   IntakeIssue[]
+  mailbox  MailAccount?
+  inbox    InboxItem[]
 }
 
 model Account {
@@ -116,9 +124,10 @@ model Lead {
   financing   String?
   leadType    LeadType @default(UNKNOWN)
 
-  score   Int        @default(0)
-  signals String[] // scoring signal keys, see src/lib/scoring.ts
-  status  LeadStatus @default(NEW)
+  score    Int        @default(0)
+  signals  String[] // scoring signal keys, see src/lib/scoring.ts
+  priority Int? // 1 high · 2 medium · 3 low — set by the agent; null = automatic
+  status   LeadStatus @default(NEW)
 
   autopilot        Boolean @default(true) // follow-up sequence running?
   autopilotNote    String? // why it was paused
@@ -126,10 +135,10 @@ model Lead {
   needsAgentReason String?
   reviewFlag       String? // sensitive conversation → human review
 
-  smsConsent    Boolean @default(true)
-  emailOptOut   Boolean @default(false)
-  doNotContact  Boolean @default(false)
-  isSample      Boolean @default(false)
+  smsConsent   Boolean @default(true)
+  emailOptOut  Boolean @default(false)
+  doNotContact Boolean @default(false)
+  isSample     Boolean @default(false)
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -140,6 +149,7 @@ model Lead {
 
   touches    Touch[]
   activities Activity[]
+  emails     InboxItem[]
 
   @@index([userId, score])
   @@index([userId, createdAt])
@@ -213,4 +223,89 @@ model IntakeIssue {
   updatedAt DateTime    @updatedAt
 
   @@index([userId, status])
+}
+
+// ─── Inbox Assistant ─────────────────────────────────────────────────────────
+
+// The connected mailbox (IMAP to read, SMTP to send). One per agent.
+model MailAccount {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider   String // gmail | outlook | yahoo | icloud | hostinger | custom
+  email      String
+  username   String
+  secretEnc  String // app password, encrypted (see src/lib/crypto.ts)
+  imapHost   String
+  imapPort   Int
+  imapSecure Boolean @default(true)
+  smtpHost   String
+  smtpPort   Int
+  smtpSecure Boolean @default(true)
+
+  enabled         Boolean @default(true)
+  mode            String  @default("approve") // approve = drafts wait for a tap · auto = sends on its own
+  replyWindowMins Int     @default(120) // how long before the assistant covers an unanswered email
+  signAs          String  @default("agent") // agent = signs as you · assistant = "Ian's assistant"
+  assistantName   String?
+
+  uidValidity String?
+  lastUid     Int       @default(0)
+  lastSyncAt  DateTime?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum Temperature {
+  HOT
+  WARM
+  COLD
+}
+
+// One email the assistant has read and sorted.
+model InboxItem {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messageId  String
+  references String?
+  fromName   String?
+  fromEmail  String
+  subject    String
+  snippet    String
+  bodyText   String
+  receivedAt DateTime
+
+  // What the assistant decided
+  category    String // new_lead | client | vendor_partner | personal | newsletter_promo | spam | other
+  intent      String?
+  temperature Temperature?
+  priority    Int          @default(3) // 1 high · 2 medium · 3 low
+  summary     String?
+  extracted   Json? // contact details pulled from the email
+  needsReply  Boolean      @default(false)
+  riskFlag    String? // wire_fraud | sensitive | complaint_or_legal | personal_matter
+  aiUsed      Boolean      @default(false)
+
+  // The "Cover me" timer
+  status         String    @default("new") // waiting | ready | held | sent | you_replied | done | skipped
+  autoAllowed    Boolean   @default(true) // false for emails that arrived before the mailbox was connected
+  assistantDueAt DateTime?
+  draftSubject   String?
+  draftBody      String?
+  sentAt         DateTime?
+  repliedAt      DateTime?
+  sendError      String?
+
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, messageId])
+  @@index([userId, status, assistantDueAt])
+  @@index([userId, receivedAt])
 }

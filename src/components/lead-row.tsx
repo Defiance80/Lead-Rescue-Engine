@@ -6,6 +6,7 @@ import { Avatar, ScoreRing, StatusChip, TierChip } from "./ui";
 import { SpeedClock } from "./client";
 import { ago, priceRange } from "@/lib/time";
 import { tierFor } from "@/lib/tiers";
+import { effectivePriority } from "@/lib/temperature";
 
 export function LeadRow({ lead, next, reason }: { lead: Lead; next?: Touch; reason?: string }) {
   const t = tierFor(lead.score);
@@ -24,6 +25,9 @@ export function LeadRow({ lead, next, reason }: { lead: Lead; next?: Touch; reas
             {lead.firstName} {lead.lastName}
           </span>
           <TierChip score={lead.score} />
+          {!lead.needsAgent && effectivePriority(lead) === 1 && lead.priority === 1 && (
+            <span className="chip bg-rose-500 text-white ring-rose-300/40">High priority</span>
+          )}
           {lead.needsAgent && (
             <span className="chip bg-rose-500/90 text-white ring-rose-300/40">
               <Hand className="h-3 w-3" /> Wants you
